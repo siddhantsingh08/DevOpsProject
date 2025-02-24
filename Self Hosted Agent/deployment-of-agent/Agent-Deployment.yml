@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: azdevops-agent 
+  namespace: default 
+  labels:
+    app: azdevops-agent
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: azdevops-agent
+  template:
+    metadata:
+      labels:
+        app: azdevops-agent
+    spec:
+      containers:
+        - name: majorassignmenagent
+          #image: ACR_NAME/REPOSITORY_NAME:latest
+          image: majorassignmenagent.azurecr.io/deployment-of-agent:latest
+          env:
+            - name: AZP_POOL
+              value: AZP_POOL_NAME
+            - name: AZP_TOKEN
+              value: AZP_TOKEN_SECRET
+            - name: AZP_URL
+              value: AZP_URL_VALUE                
+          volumeMounts:
+          - mountPath: /var/run/docker.sock
+            name: docker-volume
+      imagePullSecrets:
+        - name: azdevop
+      volumes:
+      - name: docker-volume
+        hostPath:
+            path: /var/run/docker.sock

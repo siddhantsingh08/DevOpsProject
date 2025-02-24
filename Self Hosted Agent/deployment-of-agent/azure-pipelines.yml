@@ -1,0 +1,30 @@
+trigger:
+  branches:
+    include:
+    - master
+
+resources:
+  - repo: self
+
+
+steps:
+          - task: Kubernetes@1
+            inputs:
+              connectionType: 'Kubernetes Service Connection'
+              kubernetesServiceEndpoint: '$(AKSserviceConnectionName)'
+              command: 'login'  
+            
+          - task: CmdLine@2
+            displayName: 'Replace Tokens'
+            inputs:
+                script: |
+                   sed -i 's,AZP_POOL_NAME,$(PoolName),g' deployment.yml
+                   sed -i 's,AZP_URL_VALUE,$(OrganizationURL),g' deployment.yml
+                   sed -i 's,AZP_TOKEN_SECRET,$(Pat),g' deployment.yml
+                   sed -i 's,ACR_NAME,$(acrRegistry),g' deployment.yml
+                   sed -i 's,REPOSITORY_NAME,$(acrRepository),g' deployment.yml
+          - task: CmdLine@2
+            displayName: 'Deploy'
+            inputs:
+                script: |
+                  kubectl apply -f deployment.yml   
